@@ -1,11 +1,12 @@
 package com.poc.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+
+import com.poc.service.ExternalService;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
@@ -22,6 +23,8 @@ public class ParentController {
 	@Autowired
 	private RestTemplate restTemplate;
 	
+	@Autowired
+	private ExternalService extService;
 	
 	@GetMapping("timeout")
 	public String getConventionalWithTimeout() {
@@ -51,18 +54,17 @@ public class ParentController {
 	
 	
 	@GetMapping("basic-resilience")
-    @CircuitBreaker(name = "mainService", fallbackMethod="testFallBack")
-	public ResponseEntity<String> getBasicReslianceSupport() {
+	public String getBasicReslianceSupport() {
 		
-		String response = restTemplate.getForObject("http://localhost:8081/serviceOne", String.class);
-        return new ResponseEntity<String>(response, HttpStatus.OK);
+		//String response = restTemplate.getForObject("http://localhost:8090", String.class);
+		
+		
+        return extService.getChildService();
 		
 		//return "Parent controller Conventional " + data;
 	}
 	
-    private  ResponseEntity<String> testFallBack(Exception e){
-        return new ResponseEntity<String>("In fallback method", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+
 	
 	
 }

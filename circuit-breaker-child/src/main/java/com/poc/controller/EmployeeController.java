@@ -10,7 +10,7 @@ public class EmployeeController {
 	public String getBanner() throws InterruptedException {
 	
 		
-		Thread.sleep(15000);
+		Thread.sleep(5000);
 		
 		return "Child Controller is up !!!!";
 	}

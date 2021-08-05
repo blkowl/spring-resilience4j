@@ -1,19 +1,42 @@
 resilience4j:
   circuitbreaker:
-    configs:
-      default:
-        register-health-indicator: true
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        permitted-number-of-calls-in-half-open-state: 3
-        automatic-transition-from-open-to-half-open-enabled: true
-        wait-duration-in-open-state: 5s
-        failure-rate-threshold: 50
-        event-consumer-buffer-size: 10
-        record-exceptions:
-                - org.springframework.web.client.HttpServerErrorException
-                - java.util.concurrent.TimeoutException
-                - java.io.IOException
     instances:
       mainService:
-        base-config: default
+        register-health-indicator: true
+        # The sliding window details at which the circuit transaitions from CLOSED state to OPEN state
+        sliding-window-size: 10
+        # Defines the calculation for minimum number of calls that are needed to calculate percentage for failure-rate-threshold and slow-call-rate-threshold 
+        # This is a very important field to make decisions
+        minimum-number-of-calls: 5
+        # This is a failure rate in terms of percentage if 50% calls are failing then change the state from CLOSED to HALF-OPEN. 
+        failure-rate-threshold: 50
+        # This is the time that governs that how much time should the service take, in this cas this is 1 sec.
+        slow-call-duration-threshold: 1000
+        # This is a slow rate in terms of percentage if 30% calls are failing then change the state from CLOSED to HALF-OPEN. 
+        slow-call-rate-threshold: 30
+        # Permitted number of calls in HALF OPEN state beyond which if failure happens then the control moves to OPEN state again
+        permitted-number-of-calls-in-half-open-state: 3
+        # Transition from open to half open - Automatic
+        automatic-transition-from-open-to-half-open-enabled: true
+        # How much to await in the open state. Traversal will be CLOSED -> OPEN -> HALF-OPEN -> CLOSED OR OPEN
+        wait-duration-in-open-state: 5s
+        # Need to see more info on this one - OFFICIAL: 
+        # The emitted CircuitBreaker, Retry, RateLimiter, Bulkhead and TimeLimiter events are stored in a separate circular event consumer buffers. 
+        event-consumer-buffer-size: 10
+# This happens to be the actuator end point.
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      registerHealthIndicator: true
